@@ -32,7 +32,11 @@ If you are using MacOS or Linux, run the following command to activate your envi
 source env/bin/activate
 ```
 
-If you are using Windows, refer to the following [documentation](https://virtualenv.pypa.io/en/legacy/userguide.html#activate-script) instead.
+If you are using Windows, run this instead:
+
+```
+env\Scripts\activate
+```
 
 
 ### 3. Install dependencies
