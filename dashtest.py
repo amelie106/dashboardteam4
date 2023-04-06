@@ -1,4 +1,6 @@
 import streamlit as st
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+
 import pandas as pd
 import altair as alt
 
@@ -115,17 +117,23 @@ def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granul
 # Define the Streamlit app
 def app():
     # Set the app title
-    st.title('COVID-19 Dashboard')
+    #st.title('COVID-19 Dashboard')
+
+    #Sidebars
+    #Title
+    st.sidebar.header("Dashboard `Covid-19`")
 
     # Load the data using the cached function
     data = load_data()
 
     # Define the time period and countries to display
-    start_date = st.date_input('Start Date', value=pd.to_datetime('2020-01-01'))
-    end_date = st.date_input('End Date', value=pd.to_datetime('today'))
+    st.sidebar.subheader("Timeline")
+    start_date = st.sidebar.date_input('Start Date', value=pd.to_datetime('2020-01-01'))
+    end_date = st.sidebar.date_input('End Date', value=pd.to_datetime('today'))
 
     # Add a dropdown menu for the user to select the view of new_cases, total_death and new_deaths
-    plot_type = st.selectbox('Select view type', ['New Cases', 'Total Deaths', 'New Deaths'])
+    st.sidebar.subheader("Parameters")
+    plot_type = st.sidebar.selectbox('Select view type', ['New Cases', 'Total Deaths', 'New Deaths'])
 
     # Define the possible columns to display for each view type
     columns_dict = {
@@ -135,16 +143,18 @@ def app():
     }
 
     # Define the column to use for the selected view type
-    column_name = st.selectbox(f'Select column for {plot_type}', columns_dict[plot_type])
+    column_name = st.sidebar.selectbox(f'Select column for {plot_type}', columns_dict[plot_type])
 
     # Define the countries or continents to display
-    selected_countries = st.multiselect('Select countries or continent to display', data['location'].unique())
+    st.sidebar.subheader("Country")
+    selected_countries = st.sidebar.multiselect('Select countries or continent to display', data['location'].unique())
 
     # Add a dropdown menu for plot type selection
     #plot_type = st.selectbox('Select plot type', ['Total Cases', 'New Cases per Million Inhabitants'])
 
     # Add a dropdown menu for granularity selection
-    granularity = st.selectbox('Select the level of granularity', ['Week', 'Month'])
+    st.sidebar.subheader("Granularity")
+    granularity = st.sidebar.selectbox('Select the level of granularity', ['Week', 'Month'])
 
     # Call the function to plot the COVID-19 cases for the selected time period and countries
     if selected_countries:
