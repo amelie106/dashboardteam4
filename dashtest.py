@@ -161,4 +161,8 @@ def app():
         st.write(f'COVID-19 Cases for {", ".join(selected_countries)}')
         plot_covid_cases(start_date, end_date, selected_countries, plot_type, granularity, data, column_name)
 
+    st.sidebar.markdown('''
+    ---
+    By Amelie,  Andreea and Clem
+    ''')
 app()
