@@ -126,10 +126,19 @@ def app():
     # Load the data using the cached function (deleted for now)
     #data = load_data()
 
-    # Define the time period and countries to display
+    # Define the time period to display
     st.sidebar.subheader("Timeline")
-    start_date = st.sidebar.date_input('Start Date', value=pd.to_datetime('2020-01-01'))
-    end_date = st.sidebar.date_input('End Date', value=pd.to_datetime('today'))
+
+    if 'start_date' not in locals():
+        start_date = pd.to_datetime('2020-01-01')
+    if 'end_date' not in locals():
+        end_date = pd.to_datetime('2020-01-31')
+
+    timespan = st.sidebar.date_input("Pick the timeframe", (start_date, end_date))
+
+    if (len(timespan) == 2):
+        start_date = timespan[0]
+        end_date = timespan[1]
 
     # Add a dropdown menu for the user to select the view of new_cases, total_death and new_deaths
     st.sidebar.subheader("Parameters")
