@@ -86,7 +86,7 @@ def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granul
         width=800,
         height=500,
         title=f"{plot_type} by country"
-    )
+    ).interactive()
 
     # Add text labels for the countries and their respective continents
     labels = alt.Chart(filtered_df.groupby('location', as_index=False).tail(1)).mark_text(align='left', dx=5).encode(
@@ -123,8 +123,8 @@ def app():
     #Title
     st.sidebar.header("Dashboard `Covid-19`")
 
-    # Load the data using the cached function
-    data = load_data()
+    # Load the data using the cached function (deleted for now)
+    #data = load_data()
 
     # Define the time period and countries to display
     st.sidebar.subheader("Timeline")
