@@ -24,9 +24,9 @@ continents = {'North America': ['Canada', 'United States', 'Mexico'],
 
 # Define a function to plot the COVID-19 cases for selected countries
 @st.cache_data
-def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granularity, data, column_name, peak_detection = False):
+def plot_covid_cases(start_date, end_date, selected_countries, granularity, data, column_name, peak_detection = False):
     x_col = 'date'
-    y_col = 'total_cases'
+    y_col = column_name
 
     # Convert start_date and end_date to datetime objects
     start_date = pd.to_datetime(start_date)
@@ -63,23 +63,6 @@ def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granul
     else:
         derivative = alt.Chart(filtered_df).mark_line().encode().properties()
 
-    # Plot the COVID-19 cases for each country
-    if plot_type == 'Total Cases':
-        y_col = 'total_cases'
-        y_label = 'Total COVID-19 Cases'
-    elif plot_type == 'New Cases per Million Inhabitants':
-        y_col = 'new_cases_per_million'
-        y_label = 'New Cases per Million Inhabitants'
-    elif plot_type == "New Cases":
-        y_col = 'new_cases'
-        y_label = 'Total COVID-19 New Cases'
-    elif plot_type == 'Total Deaths':
-        y_col = 'total_deaths'
-        y_label = 'Total COVID-19 Deaths'
-    elif plot_type == 'New Deaths':
-        y_col = 'new_deaths'
-        y_label = 'New Deaths'
-
     # Determine the level of granularity based on user input
     if granularity == 'Month':
         x_col = pd.Grouper(key='date', freq='M')
@@ -95,7 +78,7 @@ def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granul
     ).properties(
         width=800,
         height=500,
-        title=f"{plot_type} by country"
+        title=f"{column_name} by country"
     ).interactive()
 
     # Add text labels for the countries and their respective continents
@@ -147,13 +130,12 @@ def app():
 
     # Add a dropdown menu for the user to select the view of new_cases, total_death and new_deaths
     st.sidebar.subheader("Parameters")
-    plot_type = st.sidebar.selectbox('Select view type', ['New Cases', 'Total Deaths', 'New Deaths'])
+    plot_type = st.sidebar.selectbox('Select view type', ['Cases', 'Deaths'])
 
     # Define the possible columns to display for each view type
     columns_dict = {
-        'New Cases': ['new_cases', 'new_cases_smoothed', 'new_cases_per_million', 'new_cases_smoothed_per_million'],
-        'Total Deaths': ['total_deaths', 'total_deaths_per_million'],
-        'New Deaths': ['new_deaths', 'new_deaths_smoothed', 'new_deaths_per_million', 'new_deaths_smoothed_per_million']
+        'Cases': ['total_cases', 'new_cases', 'total_cases_per_million', 'new_cases_per_million'],
+        'Deaths': ['total_deaths', 'new_deaths', 'total_deaths_per_million', 'new_deaths_per_million']
     }
 
     # Define the column to use for the selected view type
@@ -179,7 +161,7 @@ def app():
     # Call the function to plot the COVID-19 cases for the selected time period and countries
     if selected_countries:
         st.write(f'COVID-19 Cases for {", ".join(selected_countries)}')
-        plot_covid_cases(start_date, end_date, selected_countries, plot_type, granularity, data, column_name, peak_detection)
+        plot_covid_cases(start_date, end_date, selected_countries, granularity, data, column_name, peak_detection)
 
     st.sidebar.markdown('''
     ---
