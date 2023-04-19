@@ -39,8 +39,12 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
     # Set the granularity of the data
     if granularity == 'Month':
         filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='M'), 'location']).sum().reset_index()
+        # x_col = 'date:M'
+        # x_col = pd.Grouper(key='date', freq='M')
     elif granularity == 'Week':
         filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='W'), 'location']).sum().reset_index()
+        # x_col = 'date:T'
+        # x_col = pd.Grouper(key='date', freq='W')
     else:
         filtered_df = filtered_df.groupby(['date', 'location']).sum().reset_index()
 
@@ -72,7 +76,7 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
         x_col = 'date'
 
     chart = alt.Chart(filtered_df).mark_line().encode(
-        x='date:T',
+        x=granularity,
         y=y_col,
         color='location'
     ).properties(
@@ -83,7 +87,7 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
 
     # Add text labels for the countries and their respective continents
     labels = alt.Chart(filtered_df.groupby('location', as_index=False).tail(1)).mark_text(align='left', dx=5).encode(
-        x='date:T',
+        x=granularity,
         y=y_col,
         text=alt.Text('location'),
         color=alt.Color('location', legend=None),
