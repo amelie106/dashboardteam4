@@ -116,15 +116,10 @@ def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granul
 
 # Define the Streamlit app
 def app():
-    # Set the app title
-    #st.title('COVID-19 Dashboard')
 
     #Sidebars
     #Title
     st.sidebar.header("Dashboard `Covid-19`")
-
-    # Load the data using the cached function (deleted for now)
-    #data = load_data()
 
     # Define the time period to display
     st.sidebar.subheader("Timeline")
