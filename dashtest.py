@@ -8,7 +8,14 @@ import altair as alt
 def load_data():
     df = pd.read_csv('https://covid.ourworldindata.org/data/owid-covid-data.csv')
     df['date'] = pd.to_datetime(df['date'])
+    df = df.rename(columns= {'new cases': 'New cases', 'new_cases_smoothed': 'New cases smoothed',
+                        'new_cases_per_million' : 'New cases per million', 'new_cases_smoothed_per_million':'New cases smoothed per million',
+                        'total_deaths' : 'Total deaths', 'total_deaths_per_million': 'Total deaths per million',
+                        'new_deaths' : 'New deaths', 'new_deaths_smoothed': 'New deaths smoothed',
+                        'new_deaths_per_million': 'New deaths per million',
+                        'new_deaths_smoothed_per_million': 'New deaths smoothed per million'})
     return df
+
 
 data_load_state = st.text('Loading data...')
 data = load_data()
@@ -58,16 +65,16 @@ def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granul
         y_col = 'total_cases'
         y_label = 'Total COVID-19 Cases'
     elif plot_type == 'New Cases per Million Inhabitants':
-        y_col = 'new_cases_per_million'
+        y_col = 'New cases per million'
         y_label = 'New Cases per Million Inhabitants'
     elif plot_type == "New Cases":
         y_col = 'new_cases'
         y_label = 'Total COVID-19 New Cases'
     elif plot_type == 'Total Deaths':
-        y_col = 'total_deaths'
+        y_col = 'Total deaths'
         y_label = 'Total COVID-19 Deaths'
     elif plot_type == 'New Deaths':
-        y_col = 'new_deaths'
+        y_col = 'New deaths'
         y_label = 'New Deaths'
 
     # Determine the level of granularity based on user input
@@ -141,9 +148,9 @@ def app():
 
     # Define the possible columns to display for each view type
     columns_dict = {
-        'New Cases': ['new_cases', 'new_cases_smoothed', 'new_cases_per_million', 'new_cases_smoothed_per_million'],
-        'Total Deaths': ['total_deaths', 'total_deaths_per_million'],
-        'New Deaths': ['new_deaths', 'new_deaths_smoothed', 'new_deaths_per_million', 'new_deaths_smoothed_per_million']
+        'New Cases': ['New cases', 'New cases_smoothed', 'New cases per million', 'New cases smoothed per million'],
+        'Total Deaths': ['Total deaths', 'Total deaths per million'],
+        'New Deaths': ['New deaths', 'New deaths smoothed', 'New deaths per million', 'New deaths smoothed per million']
     }
 
     # Define the column to use for the selected view type
