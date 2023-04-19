@@ -24,7 +24,7 @@ continents = {'North America': ['Canada', 'United States', 'Mexico'],
 
 # Define a function to plot the COVID-19 cases for selected countries
 @st.cache_data
-def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granularity, data, column_name):
+def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granularity, data, column_name, peak_detection = False):
     x_col = 'date'
     y_col = 'total_cases'
 
@@ -52,6 +52,16 @@ def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granul
         return "Other"
 
     country_groups = filtered_df.groupby('location')['location'].first().apply(get_continent).to_dict()
+
+    # Peak detection
+    if peak_detection:
+        filtered_df['derivative'] = filtered_df[column_name].diff()
+        derivative = alt.Chart(filtered_df).mark_line().encode(
+            x=x_col,
+            y='derivative'
+        )
+    else:
+        derivative = alt.Chart(filtered_df).mark_line().encode().properties()
 
     # Plot the COVID-19 cases for each country
     if plot_type == 'Total Cases':
@@ -97,7 +107,7 @@ def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granul
         tooltip=['location', alt.Tooltip(y_col, format=',')]
     )
 
-    chart = (chart + labels).configure_axis(
+    chart = (derivative + chart + labels).configure_axis(
         labelFontSize=12,
         titleFontSize=14,
         gridOpacity=0.4
@@ -149,6 +159,12 @@ def app():
     # Define the column to use for the selected view type
     column_name = st.sidebar.selectbox(f'Select column for {plot_type}', columns_dict[plot_type])
 
+    # Activate checkbox for peak detection only for cumulative values
+    if 'total' in column_name:
+        peak_detection = st.sidebar.checkbox(f'Activate peak detection', value=False)
+    else:
+        peak_detection = False
+
     # Define the countries or continents to display
     st.sidebar.subheader("Country")
     selected_countries = st.sidebar.multiselect('Select countries or continent to display', data['location'].unique())
@@ -163,7 +179,7 @@ def app():
     # Call the function to plot the COVID-19 cases for the selected time period and countries
     if selected_countries:
         st.write(f'COVID-19 Cases for {", ".join(selected_countries)}')
-        plot_covid_cases(start_date, end_date, selected_countries, plot_type, granularity, data, column_name)
+        plot_covid_cases(start_date, end_date, selected_countries, plot_type, granularity, data, column_name, peak_detection)
 
     st.sidebar.markdown('''
     ---
