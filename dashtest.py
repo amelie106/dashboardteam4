@@ -4,6 +4,7 @@ st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 import pandas as pd
 import altair as alt
 
+
 @st.cache_data()
 def load_data():
     df = pd.read_csv('https://covid.ourworldindata.org/data/owid-covid-data.csv')
@@ -14,17 +15,9 @@ data_load_state = st.text('Loading data...')
 data = load_data()
 data_load_state.text("Done! Enjoy the dashboard!")
 
-# Create a dictionary that maps countries to their respective continents
-continents = {'North America': ['Canada', 'United States', 'Mexico'],
-              'South America': ['Brazil', 'Argentina', 'Colombia'],
-              'Europe': ['United Kingdom', 'France', 'Germany', 'Italy', 'Spain'],
-              'Asia': ['China', 'India', 'Japan', 'South Korea'],
-              'Africa': ['South Africa', 'Nigeria', 'Egypt'],
-              'Oceania': ['Australia', 'New Zealand']}
-
 # Define a function to plot the COVID-19 cases for selected countries
 @st.cache_data
-def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granularity, data, column_name):
+def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granularity, data, column_name, location_col):
     x_col = 'date'
     y_col = 'total_cases'
 
@@ -44,14 +37,13 @@ def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granul
     else:
         filtered_df = filtered_df.groupby(['date', 'location']).sum().reset_index()
 
-    # Categorize the countries by continents
-    def get_continent(country):
-        for continent, countries in continents.items():
-            if country in countries:
-                return continent
-        return "Other"
-
-    country_groups = filtered_df.groupby('location')['location'].first().apply(get_continent).to_dict()
+        # Create a selector for countries and continents
+        # added missing location_col parameter and options initialization
+    if location_col == 'Continent':
+        filtered_df = filtered_df.groupby(['continent']).sum().reset_index()
+        options = filtered_df['continent'].unique()
+    elif location_col == 'Country':
+        options = filtered_df['location'].unique()
 
     # Plot the COVID-19 cases for each country
     if plot_type == 'Total Cases':
@@ -116,15 +108,9 @@ def plot_covid_cases(start_date, end_date, selected_countries, plot_type, granul
 
 # Define the Streamlit app
 def app():
-    # Set the app title
-    #st.title('COVID-19 Dashboard')
-
     #Sidebars
     #Title
     st.sidebar.header("Dashboard `Covid-19`")
-
-    # Load the data using the cached function (deleted for now)
-    #data = load_data()
 
     # Define the time period and countries to display
     st.sidebar.subheader("Timeline")
@@ -134,6 +120,7 @@ def app():
     # Add a dropdown menu for the user to select the view of new_cases, total_death and new_deaths
     st.sidebar.subheader("Parameters")
     plot_type = st.sidebar.selectbox('Select view type', ['New Cases', 'Total Deaths', 'New Deaths'])
+    location_col = st.sidebar.selectbox('Select location', ['Continent', 'Country'])
 
     # Define the possible columns to display for each view type
     columns_dict = {
@@ -145,21 +132,30 @@ def app():
     # Define the column to use for the selected view type
     column_name = st.sidebar.selectbox(f'Select column for {plot_type}', columns_dict[plot_type])
 
-    # Define the countries or continents to display
-    st.sidebar.subheader("Country")
-    selected_countries = st.sidebar.multiselect('Select countries or continent to display', data['location'].unique())
-
-    # Add a dropdown menu for plot type selection
-    #plot_type = st.selectbox('Select plot type', ['Total Cases', 'New Cases per Million Inhabitants'])
-
     # Add a dropdown menu for granularity selection
     st.sidebar.subheader("Granularity")
     granularity = st.sidebar.selectbox('Select the level of granularity', ['Week', 'Month'])
 
+    # Add a selector for the user to choose between Continent and Country
+    st.sidebar.subheader("Country Selector")
+    country_selector = st.sidebar.selectbox("Select a location type", ["Continent", "Country"])
+
+    # Create a selector for countries and continents
+    if country_selector == 'Continent':
+        filtered_df = data.groupby(['continent']).sum().reset_index()
+        location_col = 'continent'
+        options = filtered_df['continent'].unique()
+    elif country_selector == 'Country':
+        location_col = 'location'
+        options = data['location'].unique()
+
+    # Add a selector for the user to choose which countries/continents to plot
+    selected_location = st.multiselect(f"Select {country_selector}s", options=options)
+
     # Call the function to plot the COVID-19 cases for the selected time period and countries
-    if selected_countries:
-        st.write(f'COVID-19 Cases for {", ".join(selected_countries)}')
-        plot_covid_cases(start_date, end_date, selected_countries, plot_type, granularity, data, column_name)
+    if selected_location:
+        st.write(f'COVID-19 Cases for {", ".join(selected_location)}')
+        plot_covid_cases(start_date, end_date, selected_location, plot_type, granularity, data, column_name, location_col)
 
     st.sidebar.markdown('''
     ---
