@@ -17,6 +17,7 @@ def load_data():
 
 # Setup
 st.set_page_config(page_title = "Covid-19 Dashboard", page_icon = ":warning:",  layout="wide", initial_sidebar_state="expanded")
+st.title(":face_with_thermometer: Covid-19 Evolution over time")
 CONTINENTS = ['Africa', 'North America', 'South America', 'Europe', 'Oceania', 'Asia']
 data_load_state = st.text('Loading data...')
 data = load_data()
