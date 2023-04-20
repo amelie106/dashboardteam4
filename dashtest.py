@@ -1,8 +1,10 @@
 import streamlit as st
-st.set_page_config(layout="wide", initial_sidebar_state="expanded")
-
 import pandas as pd
 import altair as alt
+
+
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+
 
 @st.cache_data()
 def load_data():
@@ -22,6 +24,7 @@ continents = {'North America': ['Canada', 'United States', 'Mexico'],
               'Africa': ['South Africa', 'Nigeria', 'Egypt'],
               'Oceania': ['Australia', 'New Zealand']}
 
+
 # Define a function to plot the COVID-19 cases for selected countries
 @st.cache_data
 def plot_covid_cases(start_date, end_date, selected_countries, granularity, data, column_name, peak_detection = False):
@@ -36,13 +39,21 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
     filtered_df = data[(data['date'] >= start_date) & (data['date'] <= end_date) &
                        (data['location'].isin(selected_countries))]
 
-    # Set the granularity of the data
-    if granularity == 'Month':
-        filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='M'), 'location']).sum().reset_index()
-    elif granularity == 'Week':
-        filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='W'), 'location']).sum().reset_index()
+    # Set the granularity of the data depending on whether it is cumulative or not
+    if 'total' in column_name:
+        if granularity == 'Month':
+            filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='M'), 'location']).tail(1).reset_index()
+        elif granularity == 'Week':
+            filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='W'), 'location']).tail(1).reset_index()
+        else:
+            filtered_df = filtered_df.groupby(['date', 'location']).tail(1).reset_index()
     else:
-        filtered_df = filtered_df.groupby(['date', 'location']).sum().reset_index()
+        if granularity == 'Month':
+            filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='M'), 'location']).sum().reset_index()
+        elif granularity == 'Week':
+            filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='W'), 'location']).sum().reset_index()
+        else:
+            filtered_df = filtered_df.groupby(['date', 'location']).sum().reset_index()
 
     # Categorize the countries by continents
     def get_continent(country):
@@ -63,16 +74,9 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
     else:
         derivative = alt.Chart(filtered_df).mark_line().encode().properties()
 
-    # Determine the level of granularity based on user input
-    if granularity == 'Month':
-        x_col = pd.Grouper(key='date', freq='M')
-    elif granularity == 'Week':
-        x_col = pd.Grouper(key='date', freq='W')
-    else:
-        x_col = 'date'
-
+    # Create chart
     chart = alt.Chart(filtered_df).mark_line().encode(
-        x='date:T',
+        x=x_col,
         y=y_col,
         color='location'
     ).properties(
@@ -83,7 +87,7 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
 
     # Add text labels for the countries and their respective continents
     labels = alt.Chart(filtered_df.groupby('location', as_index=False).tail(1)).mark_text(align='left', dx=5).encode(
-        x='date:T',
+        x=x_col,
         y=y_col,
         text=alt.Text('location'),
         color=alt.Color('location', legend=None),
@@ -106,6 +110,7 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
     st.altair_chart(chart, use_container_width=True)
 
     return chart
+
 
 # Define the Streamlit app
 def app():
@@ -151,12 +156,9 @@ def app():
     st.sidebar.subheader("Country")
     selected_countries = st.sidebar.multiselect('Select countries or continent to display', data['location'].unique())
 
-    # Add a dropdown menu for plot type selection
-    #plot_type = st.selectbox('Select plot type', ['Total Cases', 'New Cases per Million Inhabitants'])
-
     # Add a dropdown menu for granularity selection
     st.sidebar.subheader("Granularity")
-    granularity = st.sidebar.selectbox('Select the level of granularity', ['Week', 'Month'])
+    granularity = st.sidebar.selectbox('Select the level of granularity', ['Day', 'Week', 'Month'])
 
     # Call the function to plot the COVID-19 cases for the selected time period and countries
     if selected_countries:
@@ -165,6 +167,6 @@ def app():
 
     st.sidebar.markdown('''
     ---
-    By Amelie,  Andreea and Clem
+    By Amelie, Andreea and Clem
     ''')
 app()
