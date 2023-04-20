@@ -9,8 +9,14 @@ st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 @st.cache_data()
 def load_data():
     df = pd.read_csv('https://covid.ourworldindata.org/data/owid-covid-data.csv')
-    df['date'] = pd.to_datetime(df['date'])
+    df = df.rename(columns= {'date': 'Date',
+                             'new_cases': 'New cases', 'new_cases_per_million' : 'New cases per million', 
+                             'total_cases':'Total cases', 'total_cases_per_million' : 'Total cases per million',
+                             'new_deaths' : 'New deaths', 'new_deaths_per_million': 'New deaths per million',
+                             'total_deaths' : 'Total deaths', 'total_deaths_per_million': 'Total deaths per million'})
+    df['Date'] = pd.to_datetime(df['Date'])
     return df
+
 
 data_load_state = st.text('Loading data...')
 data = load_data()
@@ -28,7 +34,7 @@ continents = {'North America': ['Canada', 'United States', 'Mexico'],
 # Define a function to plot the COVID-19 cases for selected countries
 @st.cache_data
 def plot_covid_cases(start_date, end_date, selected_countries, granularity, data, column_name, peak_detection = False):
-    x_col = 'date'
+    x_col = 'Date'
     y_col = column_name
 
     # Convert start_date and end_date to datetime objects
@@ -36,24 +42,24 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
     end_date = pd.to_datetime(end_date)
 
     # Filter the data for the selected time period and countries
-    filtered_df = data[(data['date'] >= start_date) & (data['date'] <= end_date) &
+    filtered_df = data[(data['Date'] >= start_date) & (data['Date'] <= end_date) &
                        (data['location'].isin(selected_countries))]
 
     # Set the granularity of the data depending on whether it is cumulative or not
-    if 'total' in column_name:
+    if 'Total' in column_name:
         if granularity == 'Month':
-            filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='M'), 'location']).tail(1).reset_index()
+            filtered_df = filtered_df.groupby([pd.Grouper(key='Date', freq='M'), 'location']).tail(1).reset_index()
         elif granularity == 'Week':
-            filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='W'), 'location']).tail(1).reset_index()
+            filtered_df = filtered_df.groupby([pd.Grouper(key='Date', freq='W'), 'location']).tail(1).reset_index()
         else:
-            filtered_df = filtered_df.groupby(['date', 'location']).tail(1).reset_index()
+            filtered_df = filtered_df.groupby(['Date', 'location']).tail(1).reset_index()
     else:
         if granularity == 'Month':
-            filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='M'), 'location']).sum().reset_index()
+            filtered_df = filtered_df.groupby([pd.Grouper(key='Date', freq='M'), 'location']).sum().reset_index()
         elif granularity == 'Week':
-            filtered_df = filtered_df.groupby([pd.Grouper(key='date', freq='W'), 'location']).sum().reset_index()
+            filtered_df = filtered_df.groupby([pd.Grouper(key='Date', freq='W'), 'location']).sum().reset_index()
         else:
-            filtered_df = filtered_df.groupby(['date', 'location']).sum().reset_index()
+            filtered_df = filtered_df.groupby(['Date', 'location']).sum().reset_index()
 
     # Categorize the countries by continents
     def get_continent(country):
@@ -142,15 +148,15 @@ def app():
 
     # Define the possible columns to display for each view type
     columns_dict = {
-        'Cases': ['total_cases', 'new_cases', 'total_cases_per_million', 'new_cases_per_million'],
-        'Deaths': ['total_deaths', 'new_deaths', 'total_deaths_per_million', 'new_deaths_per_million']
+        'Cases': ['New cases', 'Total cases', 'New cases per million', 'Total cases per million'],
+        'Deaths': ['New deaths', 'Total deaths', 'New deaths per million', 'Total deaths per million']
     }
 
     # Define the column to use for the selected view type
     column_name = st.sidebar.selectbox(f'Select column for {plot_type}', columns_dict[plot_type])
 
     # Activate checkbox for peak detection only for cumulative values
-    if 'total' in column_name:
+    if 'Total' in column_name:
         peak_detection = st.sidebar.checkbox(f'Activate peak detection', value=False)
     else:
         peak_detection = False
