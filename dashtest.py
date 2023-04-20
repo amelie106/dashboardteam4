@@ -40,15 +40,20 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
     if 'Total' in column_name:
         if granularity == 'Month':
             filtered_df = filtered_df.groupby([pd.Grouper(key='Date', freq='M'), 'location']).tail(1).reset_index()
+            x_col=filtered_df['Date'].dt.to_period("M").rename("Month")
         elif granularity == 'Week':
             filtered_df = filtered_df.groupby([pd.Grouper(key='Date', freq='W'), 'location']).tail(1).reset_index()
+            x_col=filtered_df['Date'].dt.to_period("W-SAT").rename("Week")
         else:
             filtered_df = filtered_df.groupby(['Date', 'location']).tail(1).reset_index()
     else:
         if granularity == 'Month':
             filtered_df = filtered_df.groupby([pd.Grouper(key='Date', freq='M'), 'location']).sum().reset_index()
+            x_col=filtered_df['Date'].dt.to_period("M").rename("Month")
+
         elif granularity == 'Week':
             filtered_df = filtered_df.groupby([pd.Grouper(key='Date', freq='W'), 'location']).sum().reset_index()
+            x_col=filtered_df['Date'].dt.to_period("W-SAT").rename("Week")
         else:
             filtered_df = filtered_df.groupby(['Date', 'location']).sum().reset_index()
 
