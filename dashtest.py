@@ -3,9 +3,6 @@ import pandas as pd
 import altair as alt
 
 
-st.set_page_config(layout="wide", initial_sidebar_state="expanded")
-
-
 @st.cache_data()
 def load_data():
     df = pd.read_csv('https://covid.ourworldindata.org/data/owid-covid-data.csv')
@@ -18,22 +15,16 @@ def load_data():
     return df
 
 
+# Setup
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+CONTINENTS = ['Africa', 'North America', 'South America', 'Europe', 'Oceania', 'Asia']
 data_load_state = st.text('Loading data...')
 data = load_data()
 data_load_state.text("Done! Enjoy the dashboard!")
 
-# Create a dictionary that maps countries to their respective continents
-continents = {'North America': ['Canada', 'United States', 'Mexico'],
-              'South America': ['Brazil', 'Argentina', 'Colombia'],
-              'Europe': ['United Kingdom', 'France', 'Germany', 'Italy', 'Spain'],
-              'Asia': ['China', 'India', 'Japan', 'South Korea'],
-              'Africa': ['South Africa', 'Nigeria', 'Egypt'],
-              'Oceania': ['Australia', 'New Zealand']}
-
-
 # Define a function to plot the COVID-19 cases for selected countries
 @st.cache_data
-def plot_covid_cases(start_date, end_date, selected_countries, granularity, data, column_name, peak_detection = False):
+def plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection):
     x_col = 'Date'
     y_col = column_name
 
@@ -43,7 +34,7 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
 
     # Filter the data for the selected time period and countries
     filtered_df = data[(data['Date'] >= start_date) & (data['Date'] <= end_date) &
-                       (data['location'].isin(selected_countries))]
+                       (data['location'].isin(selected_locations))]
 
     # Set the granularity of the data depending on whether it is cumulative or not
     if 'Total' in column_name:
@@ -60,15 +51,6 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
             filtered_df = filtered_df.groupby([pd.Grouper(key='Date', freq='W'), 'location']).sum().reset_index()
         else:
             filtered_df = filtered_df.groupby(['Date', 'location']).sum().reset_index()
-
-    # Categorize the countries by continents
-    def get_continent(country):
-        for continent, countries in continents.items():
-            if country in countries:
-                return continent
-        return "Other"
-
-    country_groups = filtered_df.groupby('location')['location'].first().apply(get_continent).to_dict()
 
     # Peak detection
     if peak_detection:
@@ -120,7 +102,6 @@ def plot_covid_cases(start_date, end_date, selected_countries, granularity, data
 
     return chart
 
-
 # Define the Streamlit app
 def app():
 
@@ -144,9 +125,20 @@ def app():
 
     # Add a dropdown menu for the user to select the view of new_cases, total_death and new_deaths
     st.sidebar.subheader("Parameters")
-    plot_type = st.sidebar.selectbox('Select view type', ['Cases', 'Deaths'])
+    location_col = st.sidebar.selectbox('Select location type', ['Continent', 'Country'])
+
+    # Add a selector for the user to choose between Continent and Country
+    # Create a selector for countries and continents
+    if location_col == 'Continent':
+        options = CONTINENTS
+    elif location_col == 'Country':
+        options = [item for item in data['location'].unique() if item not in CONTINENTS]
+        
+    selected_locations = st.sidebar.multiselect(f"Select {location_col.lower()}s", options=options)
 
     # Define the possible columns to display for each view type
+    plot_type = st.sidebar.selectbox('Select view type', ['Cases', 'Deaths'])
+
     columns_dict = {
         'Cases': ['New cases', 'Total cases', 'New cases per million', 'Total cases per million'],
         'Deaths': ['New deaths', 'Total deaths', 'New deaths per million', 'Total deaths per million']
@@ -161,18 +153,14 @@ def app():
     else:
         peak_detection = False
 
-    # Define the countries or continents to display
-    st.sidebar.subheader("Country")
-    selected_countries = st.sidebar.multiselect('Select countries or continent to display', data['location'].unique())
-
     # Add a dropdown menu for granularity selection
     st.sidebar.subheader("Granularity")
     granularity = st.sidebar.selectbox('Select the level of granularity', ['Day', 'Week', 'Month'])
 
     # Call the function to plot the COVID-19 cases for the selected time period and countries
-    if selected_countries:
-        st.write(f'COVID-19 Cases for {", ".join(selected_countries)}')
-        plot_covid_cases(start_date, end_date, selected_countries, granularity, data, column_name, peak_detection)
+    if selected_locations:
+        st.write(f'COVID-19 Cases for {", ".join(selected_locations)}')
+        plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection)
 
     st.sidebar.markdown('''
     ---
