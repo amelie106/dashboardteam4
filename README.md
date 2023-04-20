@@ -45,3 +45,8 @@ Finally, install the requirements for this project by running the following comm
 ```
 python -m pip install -r requirements.txt
 ```
+### 4. Accessing the dashboard
+
+```
+To access the dashboard on the Cloud, please follow the following link [here](https://dashing-ladies-covid-data.streamlit.app/)
+```
