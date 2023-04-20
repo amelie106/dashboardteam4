@@ -60,8 +60,10 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
         derivative = alt.Chart(filtered_df).mark_line().encode(
             x=x_col,
             y='derivative',
-            color='location',
-            strokeDash=alt.value([5, 5])
+            #color='location',
+            strokeDash=alt.value([5, 5]),
+            color = alt.Color('Value:Q', scale=alt.Scale(scheme='reds')),
+            tooltip = ['Country:N', 'Value:Q']
         )
     else:
         derivative = alt.Chart(filtered_df).mark_line().encode().properties()
