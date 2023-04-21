@@ -1,13 +1,17 @@
 [theme]
 
-primaryColor = "#E694FF"
+primaryColor = "#0073e6"
 
 # Background color
-backgroundColor = "#00171B"
+backgroundColor = "#e6ffff"
 
 # Sidebar Background color
-secondaryBackgroundColor = "#00100"
+<<<<<<< HEAD
+secondaryBackgroundColor = "#99ccff"
 
+=======
+secondaryBackgroundColor = "#00100"
+>>>>>>> 1ecf1d2e1da5d6aba76d30b21492ca4237c30134
 # Alt text colot
-textColor = "#FFF"
+textColor = "#000066"
 font = "sans serif"
