@@ -36,6 +36,10 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
     # Filter the data for the selected time period and countries
     filtered_df = data[(data['Date'] >= start_date) & (data['Date'] <= end_date) &
                        (data['location'].isin(selected_locations))]
+    
+    # Add a rolling average (7 days) column to the DataFrame if rolling_average is True
+    if rolling_average:
+        filtered_df[f'{column_name} rolling average'] = filtered_df.groupby('location')[column_name].rolling(window=7).mean().reset_index(0, drop=True)
 
     # Set the granularity of the data depending on whether it is cumulative or not
     if 'Total' in column_name:
@@ -53,10 +57,6 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
         else:
             filtered_df = filtered_df.groupby(['Date', 'location']).sum().reset_index()
 
-    # Add a rolling average (7 days) column to the DataFrame if rolling_average is True
-    if rolling_average:
-        filtered_df[f'{column_name} rolling average'] = filtered_df.groupby('location')[column_name].rolling(window=7).mean().reset_index(0, drop=True)
-
     # Create chart
     chart = alt.Chart(filtered_df).mark_line().encode(
         x=x_col,
@@ -70,11 +70,11 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
 
     # Peak detection
     if peak_detection:
-        filtered_df['derivative'] = filtered_df[column_name].diff()
-        filtered_df['derivative'] = filtered_df['derivative'].apply(lambda x: x if x > 0 else 0)
+        filtered_df['Peak Detection'] = filtered_df[column_name].diff()
+        filtered_df['Peak Detection'] = filtered_df['Peak Detection'].apply(lambda x: x if x > 0 else 0)
         derivative = alt.Chart(filtered_df).mark_line().encode(
             x=x_col,
-            y='derivative',
+            y='Peak Detection',
             color='location',
             strokeDash=alt.value([5, 5]),
             tooltip = ['Country:N', 'Value:Q']
