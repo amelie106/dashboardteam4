@@ -69,11 +69,11 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
 
     # Peak detection
     if peak_detection:
-        filtered_df['derivative'] = filtered_df[column_name].diff()
-        filtered_df['derivative'] = filtered_df['derivative'].apply(lambda x: x if x > 0 else 0)
+        filtered_df['Peak Detection'] = filtered_df[column_name].diff()
+        filtered_df['Peak Detection'] = filtered_df['Peak Detection'].apply(lambda x: x if x > 0 else 0)
         derivative = alt.Chart(filtered_df).mark_line().encode(
             x=x_col,
-            y='derivative',
+            y='Peak Detection',
             color='location',
             strokeDash=alt.value([5, 5])
         )
