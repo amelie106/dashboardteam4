@@ -1,0 +1,13 @@
+[theme]
+
+primaryColor = "#0073e6"
+
+# Background color
+backgroundColor = "#e6ffff"
+
+# Sidebar Background color
+secondaryBackgroundColor = "#99ccff"
+
+# Alt text colot
+textColor = "#000066"
+font = "sans serif"

@@ -17,14 +17,15 @@ def load_data():
 
 # Setup
 CONTINENTS = ['Africa', 'North America', 'South America', 'Europe', 'Oceania', 'Asia']
-st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title = "Covid-19 Dashboard", page_icon = ":warning:",  layout="wide", initial_sidebar_state="expanded")
+st.title(":face_with_thermometer: Pandemic Evolution over time")
 data_load_state = st.text('Loading data...')
 data = load_data()
 data_load_state.text("Done! Enjoy the dashboard!")
 
 # Define a function to plot the COVID-19 cases for selected countries
 @st.cache_data
-def plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average):
+def plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average, location_col):
     x_col = 'Date'
     y_col = column_name
 
@@ -64,7 +65,7 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
     ).properties(
         width=800,
         height=500,
-        title=f"{column_name} by country"
+        title=f"{column_name} by {location_col}"
     ).interactive()
 
     # Peak detection
@@ -75,7 +76,8 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
             x=x_col,
             y='Peak Detection',
             color='location',
-            strokeDash=alt.value([5, 5])
+            strokeDash=alt.value([5, 5]),
+            tooltip = ['Country:N', 'Value:Q']
         )
     else:
         derivative = alt.Chart(filtered_df).mark_line().encode().properties()
@@ -93,7 +95,7 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
         x=x_col,
         y=y_col,
         text=alt.Text('location'),
-        color=alt.Color('location', legend=None),
+        color=alt.Color('location'),
         tooltip=['location', alt.Tooltip(y_col, format=',')]
     )
 
@@ -144,8 +146,18 @@ def app():
         options = CONTINENTS
     elif location_col == 'Country':
         options = [item for item in data['location'].unique() if item not in CONTINENTS]
-        
+
     selected_locations = st.sidebar.multiselect(f"Select {location_col.lower()}s", options=options)
+
+    if location_col == 'Continent':
+        selected_text = "Selected continents:"
+    else:
+        selected_text = "Selected countries:"
+
+    selected_text += "\n\n"
+    for loc in selected_locations:
+        selected_text += f"- {loc}\n"
+    st.markdown(selected_text)
 
     # Define the possible columns to display for each view type
     plot_type = st.sidebar.selectbox('Select view type', ['Cases', 'Deaths'])
@@ -173,12 +185,12 @@ def app():
 
     # Call the function to plot the COVID-19 cases for the selected time period and countries
     if selected_locations:
-        st.write(f'COVID-19 Cases for {", ".join(selected_locations)}')
-        plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average)
+        #st.write(f'COVID-19 Cases for {", ".join(selected_locations)}')
+        plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average, location_col)
 
     st.sidebar.markdown('''
     ---
-    By Amelie, Andreea and Clem
+    Amelie, Andreea and Clem
     ''')
 
 app()
