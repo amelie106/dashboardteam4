@@ -25,7 +25,7 @@ data_load_state.text("Done! Enjoy the dashboard!")
 
 # Define a function to plot the COVID-19 cases for selected countries
 @st.cache_data
-def plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average):
+def plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average, location_col):
     x_col = 'Date'
     y_col = column_name
 
@@ -65,7 +65,7 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
     ).properties(
         width=800,
         height=500,
-        title=f"{column_name} by country"
+        title=f"{column_name} by {location_col}"
     ).interactive()
 
     # Peak detection
@@ -186,7 +186,7 @@ def app():
     # Call the function to plot the COVID-19 cases for the selected time period and countries
     if selected_locations:
         st.write(f'COVID-19 Cases for {", ".join(selected_locations)}')
-        plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average)
+        plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average, location_col)
 
     st.sidebar.markdown('''
     ---
