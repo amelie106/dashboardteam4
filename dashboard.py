@@ -95,7 +95,7 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
         x=x_col,
         y=y_col,
         text=alt.Text('location'),
-        color=alt.Color('location', legend=None),
+        color=alt.Color('location'),
         tooltip=['location', alt.Tooltip(y_col, format=',')]
     )
 
