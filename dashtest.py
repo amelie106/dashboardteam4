@@ -16,15 +16,15 @@ def load_data():
 
 
 # Setup
-st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 CONTINENTS = ['Africa', 'North America', 'South America', 'Europe', 'Oceania', 'Asia']
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
 data_load_state = st.text('Loading data...')
 data = load_data()
 data_load_state.text("Done! Enjoy the dashboard!")
 
 # Define a function to plot the COVID-19 cases for selected countries
 @st.cache_data
-def plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average=False):
+def plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average):
     x_col = 'Date'
     y_col = column_name
 
@@ -56,6 +56,17 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
     if rolling_average:
         filtered_df[f'{column_name} rolling avg'] = filtered_df.groupby('location')[column_name].rolling(window=7).mean().reset_index(0, drop=True)
 
+    # Create chart
+    chart = alt.Chart(filtered_df).mark_line().encode(
+        x=x_col,
+        y=y_col,
+        color='location'
+    ).properties(
+        width=800,
+        height=500,
+        title=f"{column_name} by country"
+    ).interactive()
+
     # Peak detection
     if peak_detection:
         filtered_df['derivative'] = filtered_df[column_name].diff()
@@ -69,18 +80,7 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
     else:
         derivative = alt.Chart(filtered_df).mark_line().encode().properties()
 
-    # Create chart
-    chart = alt.Chart(filtered_df).mark_line().encode(
-        x=x_col,
-        y=y_col,
-        color='location'
-    ).properties(
-        width=800,
-        height=500,
-        title=f"{column_name} by country"
-    ).interactive()
-
-    # Add the rolling average (7 days) line to the chart if rolling_average is True
+    # Roling average
     if rolling_average:
         chart = chart + alt.Chart(filtered_df).mark_line(strokeDash=[2, 2], strokeOpacity=0.5).encode(
             x=x_col,
@@ -176,15 +176,7 @@ def app():
     # Call the function to plot the COVID-19 cases for the selected time period and countries
     if selected_locations:
         st.write(f'COVID-19 Cases for {", ".join(selected_locations)}')
-
-        # Plot the COVID-19 cases for the selected countries
-        if rolling_average:
-            rolling_df = data[data['location'].isin(location)].groupby(['location'])['New cases', 'New deaths'].rolling(7, min_periods=1).mean()
-            rolling_df = rolling_df.reset_index().rename(columns={'level_1': 'Date'})
-            rolling_df['Date'] = pd.to_datetime(rolling_df['Date'])
-            plot_covid_cases(start_date, end_date, selected_locations, granularity, rolling_df, column_name, peak_detection)
-        else:
-            plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection)
+        plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average)
 
     st.sidebar.markdown('''
     ---
