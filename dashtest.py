@@ -54,7 +54,7 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
 
     # Add a rolling average (7 days) column to the DataFrame if rolling_average is True
     if rolling_average:
-        filtered_df[f'{column_name} rolling avg'] = filtered_df.groupby('location')[column_name].rolling(window=7).mean().reset_index(0, drop=True)
+        filtered_df[f'{column_name} rolling average'] = filtered_df.groupby('location')[column_name].rolling(window=7).mean().reset_index(0, drop=True)
 
     # Create chart
     chart = alt.Chart(filtered_df).mark_line().encode(
@@ -84,7 +84,7 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
     if rolling_average:
         chart = chart + alt.Chart(filtered_df).mark_line(strokeDash=[2, 2], strokeOpacity=0.5).encode(
             x=x_col,
-            y=f'{column_name} rolling avg',
+            y=f'{column_name} rolling average',
             color='location'
         )
 
