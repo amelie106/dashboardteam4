@@ -59,4 +59,4 @@ streamlit run dashboard.py
 ## Accessing the dashboard
 
 
-To access the dashboard on the Cloud, please follow the following link [here](https://dashing-ladies-covid-data.streamlit.app/)
+To access the dashboard on the Cloud, please follow the following link [here](https://dashing-ladies-board.streamlit.app/)
