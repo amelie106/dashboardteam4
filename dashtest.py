@@ -54,7 +54,7 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
 
     # Add a rolling average (7 days) column to the DataFrame if rolling_average is True
     if rolling_average:
-        filtered_df[f'{column_name} rolling avg'] = filtered_df.groupby('location')[column_name].rolling(window=7).mean().reset_index(0, drop=True)
+        filtered_df[f'{column_name} rolling average'] = filtered_df.groupby('location')[column_name].rolling(window=7).mean().reset_index(0, drop=True)
 
     # Peak detection
     if peak_detection:
@@ -84,7 +84,7 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
     if rolling_average:
         chart = chart + alt.Chart(filtered_df).mark_line(strokeDash=[2, 2], strokeOpacity=0.5).encode(
             x=x_col,
-            y=f'{column_name} rolling avg',
+            y=f'{column_name} rolling average',
             color='location'
         )
 
@@ -177,14 +177,14 @@ def app():
     if selected_locations:
         st.write(f'COVID-19 Cases for {", ".join(selected_locations)}')
 
-        # Plot the COVID-19 cases for the selected countries
-        if rolling_average:
-            rolling_df = data[data['location'].isin(location)].groupby(['location'])['New cases', 'New deaths'].rolling(7, min_periods=1).mean()
-            rolling_df = rolling_df.reset_index().rename(columns={'level_1': 'Date'})
-            rolling_df['Date'] = pd.to_datetime(rolling_df['Date'])
-            plot_covid_cases(start_date, end_date, selected_locations, granularity, rolling_df, column_name, peak_detection)
-        else:
-            plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection)
+    # Plot the COVID-19 cases for the selected countries
+    if rolling_average:
+        rolling_df = data[data['location'].isin(location)].groupby(['location'])['New cases', 'New deaths'].rolling(7, min_periods=1).mean()
+        rolling_df = rolling_df.reset_index().rename(columns={'level_1': 'Date'})
+        rolling_df['Date'] = pd.to_datetime(rolling_df['Date'])
+        plot_covid_cases(start_date, end_date, selected_locations, granularity, rolling_df, column_name, peak_detection)
+    else:
+        plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection)
 
     st.sidebar.markdown('''
     ---
