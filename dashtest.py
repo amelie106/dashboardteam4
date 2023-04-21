@@ -136,8 +136,18 @@ def app():
         options = CONTINENTS
     elif location_col == 'Country':
         options = [item for item in data['location'].unique() if item not in CONTINENTS]
-        
+
     selected_locations = st.sidebar.multiselect(f"Select {location_col.lower()}s", options=options)
+
+    if location_col == 'Continent':
+        selected_text = "Selected continents:"
+    else:
+        selected_text = "Selected countries:"
+
+    selected_text += "\n\n"
+    for loc in selected_locations:
+        selected_text += f"- {loc}\n"
+    st.markdown(selected_text)
 
     # Define the possible columns to display for each view type
     plot_type = st.sidebar.selectbox('Select view type', ['Cases', 'Deaths'])
