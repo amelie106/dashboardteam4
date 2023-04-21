@@ -45,6 +45,17 @@ Finally, install the requirements for this project by running the following comm
 ```
 python -m pip install -r requirements.txt
 ```
+
+
+## Running the dashboard
+
+To execute the dashboard locally, run the following command:
+
+```
+streamlit run dashboard.py
+```
+
+
 ## Accessing the dashboard
 
 
