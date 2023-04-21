@@ -1,0 +1,68 @@
+{
+    "@context": "https://doi.org/10.5063/schema/codemeta-2.0",
+    "@type": "SoftwareSourceCode",
+    "license": "https://spdx.org/licenses/MIT",
+    "codeRepository": "https://github.com/amelie106/dashboardteam4",
+    "dateCreated": "2023-04-20",
+    "datePublished": "2023-04-20",
+    "dateModified": "2023-04-20",
+    "issueTracker": "https://github.com/amelie106/dashboardteam4/issues",
+    "name": "The Dashing Ladies Covid App ",
+    "version": "1.0.0",
+    "description": "This app is an interactive dashboard of Covid-19 data, specifically cases/deaths per country as a function of time. The visualization of the evolution of the pandemic includes many features, such as peak detection, rolling average, and the possibility to compare countries/continents.",
+    "applicationCategory": "Covid-19",
+    "developmentStatus": "active",
+    "funder": {
+        "@type": "Organization",
+        "name": "Learning Planet Institute"
+    },
+    "keywords": [
+        "data analysis",
+        "dashboard",
+        "covid-19",
+        "visualisation"
+    ],
+    "programmingLanguage": [
+        "Python"
+    ],
+    "operatingSystem": [
+        "Linus",
+        "Windox",
+        "MacOS"
+    ],
+    "softwareRequirements": [
+        "https://github.com/amelie106/dashboardteam4/blob/main/requirements.txt"
+    ],
+    "author": [
+        {
+            "@type": "Person",
+            "givenName": "Amelie",
+            "familyName": "Schneider",
+            "email": "amelie.schneider@cri-paris.org",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Learning Planet Insitute, Université Paris Cité"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Andreea",
+            "familyName": "Stroia",
+            "email": "andreea.stroia@cri-paris.org",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Learning Planet Insitute, Université Paris Cité"
+            }
+        },
+        {
+            "@type": "Person",
+            "givenName": "Clémence ",
+            "familyName": "Maquet",
+            "email": "clemence.maquet@cri-paris.org",
+            "affiliation": {
+                "@type": "Organization",
+                "name": "Learning Planet Insitute, Université Paris Cité"
+            }
+        }
+    ]
+}
