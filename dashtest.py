@@ -114,8 +114,6 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
 
     return chart
 
-location = data['location']
-
 # Define the Streamlit app
 def app():
     #Sidebars
