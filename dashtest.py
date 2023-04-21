@@ -167,6 +167,6 @@ def app():
 
     st.sidebar.markdown('''
     ---
-    By Amelie, Andreea and Clem
+    Amelie, Andreea and Clem
     ''')
 app()
