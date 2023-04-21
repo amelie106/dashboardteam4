@@ -185,7 +185,7 @@ def app():
 
     # Call the function to plot the COVID-19 cases for the selected time period and countries
     if selected_locations:
-        st.write(f'COVID-19 Cases for {", ".join(selected_locations)}')
+        #st.write(f'COVID-19 Cases for {", ".join(selected_locations)}')
         plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average, location_col)
 
     st.sidebar.markdown('''
