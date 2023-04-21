@@ -16,16 +16,16 @@ def load_data():
 
 
 # Setup
+CONTINENTS = ['Africa', 'North America', 'South America', 'Europe', 'Oceania', 'Asia']
 st.set_page_config(page_title = "Covid-19 Dashboard", page_icon = ":warning:",  layout="wide", initial_sidebar_state="expanded")
 st.title(":face_with_thermometer: Pandemic Evolution over time")
-CONTINENTS = ['Africa', 'North America', 'South America', 'Europe', 'Oceania', 'Asia']
 data_load_state = st.text('Loading data...')
 data = load_data()
 data_load_state.text("Done! Enjoy the dashboard!")
 
 # Define a function to plot the COVID-19 cases for selected countries
 @st.cache_data
-def plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection):
+def plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average, location_col):
     x_col = 'Date'
     y_col = column_name
 
@@ -53,20 +53,9 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
         else:
             filtered_df = filtered_df.groupby(['Date', 'location']).sum().reset_index()
 
-    # Peak detection
-    if peak_detection:
-        filtered_df['derivative'] = filtered_df[column_name].diff()
-        filtered_df['derivative'] = filtered_df['derivative'].apply(lambda x: x if x > 0 else 0)
-        derivative = alt.Chart(filtered_df).mark_line().encode(
-            x=x_col,
-            y='derivative',
-            #color='location',
-            strokeDash=alt.value([5, 5]),
-            color = alt.Color('Value:Q', scale=alt.Scale(scheme='reds')),
-            tooltip = ['Country:N', 'Value:Q']
-        )
-    else:
-        derivative = alt.Chart(filtered_df).mark_line().encode().properties()
+    # Add a rolling average (7 days) column to the DataFrame if rolling_average is True
+    if rolling_average:
+        filtered_df[f'{column_name} rolling average'] = filtered_df.groupby('location')[column_name].rolling(window=7).mean().reset_index(0, drop=True)
 
     # Create chart
     chart = alt.Chart(filtered_df).mark_line().encode(
@@ -76,8 +65,30 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
     ).properties(
         width=800,
         height=500,
-        title=f"{column_name} by country"
+        title=f"{column_name} by {location_col}"
     ).interactive()
+
+    # Peak detection
+    if peak_detection:
+        filtered_df['derivative'] = filtered_df[column_name].diff()
+        filtered_df['derivative'] = filtered_df['derivative'].apply(lambda x: x if x > 0 else 0)
+        derivative = alt.Chart(filtered_df).mark_line().encode(
+            x=x_col,
+            y='derivative',
+            color='location',
+            strokeDash=alt.value([5, 5]),
+            tooltip = ['Country:N', 'Value:Q']
+        )
+    else:
+        derivative = alt.Chart(filtered_df).mark_line().encode().properties()
+
+    # Roling average
+    if rolling_average:
+        chart = chart + alt.Chart(filtered_df).mark_line(strokeDash=[2, 2], strokeOpacity=0.5).encode(
+            x=x_col,
+            y=f'{column_name} rolling average',
+            color='location'
+        )
 
     # Add text labels for the countries and their respective continents
     labels = alt.Chart(filtered_df.groupby('location', as_index=False).tail(1)).mark_text(align='left', dx=5).encode(
@@ -107,7 +118,6 @@ def plot_covid_cases(start_date, end_date, selected_locations, granularity, data
 
 # Define the Streamlit app
 def app():
-
     #Sidebars
     #Title
     st.sidebar.header("Dashboard `Covid-19`")
@@ -136,8 +146,18 @@ def app():
         options = CONTINENTS
     elif location_col == 'Country':
         options = [item for item in data['location'].unique() if item not in CONTINENTS]
-        
+
     selected_locations = st.sidebar.multiselect(f"Select {location_col.lower()}s", options=options)
+
+    if location_col == 'Continent':
+        selected_text = "Selected continents:"
+    else:
+        selected_text = "Selected countries:"
+
+    selected_text += "\n\n"
+    for loc in selected_locations:
+        selected_text += f"- {loc}\n"
+    st.markdown(selected_text)
 
     # Define the possible columns to display for each view type
     plot_type = st.sidebar.selectbox('Select view type', ['Cases', 'Deaths'])
@@ -156,17 +176,21 @@ def app():
     else:
         peak_detection = False
 
+    # Add a checkbox for the rolling average
+    rolling_average = st.sidebar.checkbox('Enable rolling average')
+
     # Add a dropdown menu for granularity selection
     st.sidebar.subheader("Granularity")
     granularity = st.sidebar.selectbox('Select the level of granularity', ['Day', 'Week', 'Month'])
 
     # Call the function to plot the COVID-19 cases for the selected time period and countries
     if selected_locations:
-        st.write(f'COVID-19 Cases for {", ".join(selected_locations)}')
-        plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection)
+        #st.write(f'COVID-19 Cases for {", ".join(selected_locations)}')
+        plot_covid_cases(start_date, end_date, selected_locations, granularity, data, column_name, peak_detection, rolling_average, location_col)
 
     st.sidebar.markdown('''
     ---
     Amelie, Andreea and Clem
     ''')
+
 app()
