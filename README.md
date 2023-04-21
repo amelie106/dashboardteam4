@@ -60,3 +60,8 @@ streamlit run dashboard.py
 
 
 To access the dashboard on the Cloud, please follow the following link [here](https://dashing-ladies-board.streamlit.app/)
+
+
+## Software heritage
+
+[![SWH](https://archive.softwareheritage.org/badge/origin/https://github.com/amelie106/dashboardteam4/)](https://archive.softwareheritage.org/browse/origin/?origin_url=https://github.com/amelie106/dashboardteam4)
